@@ -6,7 +6,7 @@ import { auth, provider } from "../firebase";
 export default function Login() {
   const signIn = (e) => {
     e.preventDefault();
-    signInWithPopup(auth, provider).catch((err) => console.log(err));
+    signInWithPopup(auth, provider);
   };
   return (
     <LoginContainer>

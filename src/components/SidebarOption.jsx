@@ -1,27 +1,34 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-undef */
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import { collection, addDoc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { enterRoom } from "../features/appSlice";
 import { db } from "../firebase";
+import CreateChannelModal from "./CreateChannelModal";
 
 export default function SidebarOption({ title, Icon, addChannelOption, id }) {
   const dispatch = useDispatch();
+  const [opened, setOpened] = useState(false);
+  const [channelName, setChannelName] = useState("");
 
   const addChannel = async () => {
-    const channelName = prompt("Enter a channel name");
-
     if (channelName) {
       try {
         await addDoc(collection(db, "rooms"), {
           name: channelName,
         });
-      } catch (e) {
-        console.error("Error adding document: ", e);
+      } catch {
+        return false;
       }
     }
   };
+
+  useEffect(() => {
+    addChannel();
+  }, [channelName]);
 
   const selectChannel = () => {
     if (id) {
@@ -30,18 +37,26 @@ export default function SidebarOption({ title, Icon, addChannelOption, id }) {
   };
 
   return (
-    <SidebarOptionContainer
-      onClick={addChannelOption ? addChannel : selectChannel}
-    >
-      {Icon && <Icon fontSize="small" style={{ padding: 10 }} />}
-      {Icon ? (
-        <h3>{title}</h3>
-      ) : (
-        <SidebarOptionChannel>
-          <span>#</span> {title}
-        </SidebarOptionChannel>
-      )}
-    </SidebarOptionContainer>
+    <>
+      <SidebarOptionContainer
+        onClick={addChannelOption ? () => setOpened(true) : selectChannel}
+      >
+        {Icon && <Icon fontSize="small" style={{ padding: 10 }} />}
+        {Icon ? (
+          <h3>{title}</h3>
+        ) : (
+          <SidebarOptionChannel>
+            <span>#</span> {title}
+          </SidebarOptionChannel>
+        )}
+      </SidebarOptionContainer>
+      <CreateChannelModal
+        opened={opened}
+        setOpened={setOpened}
+        setChannelName={setChannelName}
+        addChannel={addChannel}
+      />
+    </>
   );
 }
 
